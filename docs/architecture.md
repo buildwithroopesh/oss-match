@@ -93,3 +93,28 @@ The aggregator preserves complete audit metadata:
 - `totalRepositoriesCount`: Total number of repositories inspected.
 - `skippedRepositories`: List of repository names that had no analyzable code.
 - `uniqueLanguagesCount`: Total number of distinct languages detected prior to collapsing.
+
+---
+
+## 4. Technology Detection System (`src/core/technology/`)
+
+The technology detection engine extracts verifiable evidence from repository artifacts to produce an evidence-backed `TechnologyProfile`.
+
+### Separation of Concerns
+- **Language Footprint**: Measures volume share (`"% of analyzed code"`).
+- **Technology Detection**: Evaluates observable evidence (`"React — Strong evidence"`).
+- The two systems remain completely decoupled.
+
+### Evidence Hierarchy
+- **Strong**: Verified manifest dependencies, verified configuration files (`Dockerfile`, `next.config.*`), direct language byte presence.
+- **Moderate**: Exact case-insensitive repository topics.
+- **Weak**: Filename patterns (`*.tsx`, `*.vue`). Filename patterns alone never produce high confidence or strong evidence.
+
+### Evidence Levels (Confidence, Never "Skill")
+- `strong`: Confirmed across $\ge 2$ repositories with strong signals, or $\ge 2$ distinct strong signal types in 1 repository.
+- `moderate`: Confirmed by $\ge 1$ strong signal or $\ge 2$ moderate signals.
+- `limited`: Only weak signals (e.g. filename patterns alone) or isolated single topic.
+- `detected`: Base fallback evidence state.
+
+All recency metrics require an injected `now: Date` to ensure deterministic execution.
+
