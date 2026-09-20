@@ -40,12 +40,5 @@ export interface TechnologyProfile {
   languageFootprint: LanguageFootprintEntry[];
 }
 
-/** A single language entry in the code footprint */
-export interface LanguageFootprintEntry {
-  language: string;
-  bytes: number;
-  /** Rounded percentage of total analyzed code (0–100) */
-  percentage: number;
-  /** Hex color for display purposes */
-  color: string;
-}
+import type { LanguageFootprintEntry } from "./language";
+export type { LanguageFootprintEntry };

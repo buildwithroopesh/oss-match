@@ -1,16 +1,13 @@
 /**
- * Core types — GitHub entities
+ * Core types — GitHub domain entities
  *
- * These types represent normalized GitHub data after Zod validation.
- * They are framework-independent and used across the entire core pipeline.
- *
- * Implemented in Milestone 2 (GitHub API client).
+ * Framework-independent TypeScript models representing validated and normalized
+ * GitHub data. These types are consumed by technology detection, language aggregation,
+ * and the matching engine.
  */
 
-export type { GitHubUser, GitHubRepository, GitHubIssue, GitHubLanguages };
-
-/** Normalized GitHub user from GET /users/{username} */
-interface GitHubUser {
+/** Normalized GitHub user profile */
+export interface GitHubUser {
   login: string;
   id: number;
   avatarUrl: string;
@@ -25,7 +22,7 @@ interface GitHubUser {
 }
 
 /** Normalized GitHub repository */
-interface GitHubRepository {
+export interface GitHubRepository {
   id: number;
   owner: string;
   name: string;
@@ -46,18 +43,25 @@ interface GitHubRepository {
 }
 
 /** Language byte counts from GET /repos/{owner}/{repo}/languages */
-interface GitHubLanguages {
+export interface GitHubLanguages {
   [language: string]: number;
 }
 
+/** Normalized GitHub issue label */
+export interface GitHubIssueLabel {
+  name: string;
+  color: string;
+  description?: string | null;
+}
+
 /** Normalized GitHub issue */
-interface GitHubIssue {
+export interface GitHubIssue {
   id: number;
   number: number;
   title: string;
   body: string | null;
   state: "open" | "closed";
-  labels: Array<{ name: string; color: string }>;
+  labels: GitHubIssueLabel[];
   createdAt: string;
   updatedAt: string;
   commentsCount: number;
@@ -75,4 +79,58 @@ interface GitHubIssue {
     | "isArchived"
     | "htmlUrl"
   >;
+}
+
+/** Neutral activity classification based on observable telemetry */
+export type ActivityLevel =
+  | "recently-active"
+  | "moderately-active"
+  | "limited-activity";
+
+/** Telemetry reflecting repository activity */
+export interface RepositoryActivity {
+  owner: string;
+  repo: string;
+  pushedAt: string;
+  lastCommitDate: string | null;
+  daysSinceLastPush: number;
+  daysSinceLastCommit: number | null;
+  activityLevel: ActivityLevel;
+}
+
+/** Rate limit telemetry parsed from response headers */
+export interface RateLimitInfo {
+  limit: number;
+  remaining: number;
+  used: number;
+  reset: number; // Unix epoch seconds
+  resource: string;
+  retryAfter?: number; // Seconds (if provided by retry-after header)
+}
+
+/** Options for fetching repositories */
+export interface GetRepositoriesOptions {
+  /** Maximum number of repositories to return (default: 30) */
+  limit?: number;
+  /** Sort order: 'created' | 'updated' | 'pushed' | 'full_name' (default: 'updated') */
+  sort?: "created" | "updated" | "pushed" | "full_name";
+  /** Direction: 'asc' | 'desc' (default: 'desc') */
+  direction?: "asc" | "desc";
+  /** Repository type: 'all' | 'owner' | 'member' (default: 'owner') */
+  type?: "all" | "owner" | "member";
+}
+
+/** Options for searching issues */
+export interface SearchIssuesOptions {
+  page?: number;
+  perPage?: number;
+  sort?: "comments" | "reactions" | "reactions-+1" | "reactions--1" | "reactions-smile" | "reactions-thinking_face" | "reactions-heart" | "reactions-tada" | "interactions" | "created" | "updated";
+  order?: "asc" | "desc";
+}
+
+/** Paginated issue search result */
+export interface IssueSearchResult {
+  totalCount: number;
+  incompleteResults: boolean;
+  issues: GitHubIssue[];
 }
