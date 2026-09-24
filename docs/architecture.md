@@ -157,5 +157,17 @@ Milestone 6 provides the user interface for executing and displaying profile ana
 - **Loading Skeleton (`src/app/profile/[username]/loading.tsx`)**: Dedicated App Router streaming fallback.
 - **A11y & Guardrails**: Accessible ARIA roles, responsive to 375px, dark mode tokens, and strictly enforces data honesty without subjective skill terminology.
 
+---
+
+## 7. Issue Discovery Engine (`src/core/issues/`)
+
+Milestone 7 introduces the issue discovery engine that queries GitHub's issue search API:
+- **Framework Independence**: Pure TypeScript under `src/core/issues/` with zero UI, browser, or framework imports.
+- **Query Builder (`buildIssueSearchQuery`)**: Compiles structured search criteria into valid GitHub search qualifiers (`is:issue`, `state:open`, `archived:false`, `language:`, `label:`, `repo:`, `updated:`, `comments:`).
+- **Observable Suitability Signals (`extractIssueSignals`)**: Extracts verifiable facts (body length, labels, timestamps, repository language, topics, stars, forks) without computing matching scores or inferring contributor skill.
+- **Deduplication & Determinism**: Deduplicates issues by ID across pagination and applies stable secondary tie-breakers (`a.id < b.id ? -1 : 1`).
+- **Resilience**: Honors rate limits and supports partial result preservation during pagination.
+
+
 
 
