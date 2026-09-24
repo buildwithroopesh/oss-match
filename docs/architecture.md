@@ -168,6 +168,15 @@ Milestone 7 introduces the issue discovery engine that queries GitHub's issue se
 - **Deduplication & Determinism**: Deduplicates issues by ID across pagination and applies stable secondary tie-breakers (`a.id < b.id ? -1 : 1`).
 - **Resilience**: Honors rate limits and supports partial result preservation during pagination.
 
+---
 
+## 8. Matching Engine (`src/core/matching/`)
 
-
+Milestone 8 introduces the deterministic, explainable matching engine that evaluates candidate issues against a verified technology profile:
+- **Framework Independence**: Pure TypeScript under `src/core/matching/` operating strictly on already-normalized domain data with zero HTTP or UI dependencies.
+- **7 Baseline Scoring Components**: Technology (35%), Language (20%), Framework/Topic (15%), Issue Suitability (10%), Repository Activity (10%), Freshness (5%), and Difficulty (5%).
+- **Strict Evidence Separation**: Technology (35%) evaluates structured issue labels only (no title/body prose, no repository topics); Framework/Topic (15%) evaluates repository topics only against user framework/platform evidence (no issue labels). Zero double-counting between the two components.
+- **Weight Renormalization**: Transparently rescales effective component weights to 100% when observable evidence for a component is unavailable, omitting missing components from the denominator without fabricating scores.
+- **Data Honesty Invariant**: Grounded strictly in observable facts with zero claims of personal expertise, zero AI/LLM heuristics, and zero machine-guessed difficulty.
+- **Deterministic Ranking**: Sorts by score descending, recency of update ascending, and issue ID ascending as a stable secondary tie-breaker.
+- **Factual Explanation Generator**: Powers transparent explanations detailing matched technologies, languages, topics, suitability highlights, and gaps.

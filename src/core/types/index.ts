@@ -6,13 +6,5 @@ export * from "./github";
 export * from "./language";
 export * from "./technology";
 export * from "./pipeline";
-export type {
-  ScoringComponent,
-  MatchResult,
-  MatchReason,
-  MatchGap,
-  DifficultyEstimate,
-  MatchEngineInput,
-  MatchEngineOutput,
-} from "./matching";
+export * from "./matching";
 export * from "./issues";
