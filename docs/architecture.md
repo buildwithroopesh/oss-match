@@ -118,3 +118,32 @@ The technology detection engine extracts verifiable evidence from repository art
 
 All recency metrics require an injected `now: Date` to ensure deterministic execution.
 
+---
+
+## 5. Profile Analysis Pipeline (`src/core/pipeline/`)
+
+The profile analysis pipeline connects the GitHub client, language aggregator, and technology detector into an audited, deterministic flow:
+
+```
+GitHub username
+      ↓
+Validate username
+      ↓
+Fetch GitHubUser (client.getUser)
+      ↓
+Fetch up to 30 repositories (client.getRepositories capped at 30)
+      ↓
+Fetch languages in bounded batches (concurrency: 5)
+      ↓
+Calculate deterministic LanguageFootprint (Largest-Remainder method)
+      ↓
+Detect technologies across repository evidence
+      ↓
+Aggregate into TechnologyProfile & ProfileAnalysisResult
+```
+
+### Determinism & Time Injection
+- The pipeline requires an explicit injected `now: Date`.
+- Wall-clock runtime duration (`durationMs`) is stored in execution metadata for diagnostics only; it never affects the domain profile, status, scoring, or ordering.
+
+
