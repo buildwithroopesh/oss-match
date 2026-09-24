@@ -3,10 +3,20 @@
 import { useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 
+export const DEFAULT_DEMO_HANDLES = [
+  "torvalds",
+  "gaearon",
+  "sindresorhus",
+  "antfu",
+];
+
 interface UsernameFormProps {
   /** Called when the form successfully validates and navigates */
   onSubmit?: (username: string) => void;
   size?: "default" | "large";
+  initialValue?: string;
+  showExamples?: boolean;
+  demoHandles?: string[];
 }
 
 // GitHub username constraints
@@ -25,20 +35,24 @@ function validateUsername(value: string): string | null {
  * The primary GitHub username input form.
  *
  * Validates the username client-side, then navigates to /profile/[username].
- * Does not make any API calls — that happens server-side on the profile page.
+ * Does not make any API calls — analysis happens server-side on the profile page.
  */
-export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) {
+export function UsernameForm({
+  onSubmit,
+  size = "default",
+  initialValue = "",
+  showExamples = false,
+  demoHandles = DEFAULT_DEMO_HANDLES,
+}: UsernameFormProps) {
   const router = useRouter();
-  const [value, setValue] = useState("");
+  const [value, setValue] = useState(initialValue);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
   const isLarge = size === "large";
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-
-    const username = value.trim();
+  function submitUsername(targetUsername: string) {
+    const username = targetUsername.trim();
     const validationError = validateUsername(username);
 
     if (validationError) {
@@ -52,13 +66,22 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
     router.push(`/profile/${encodeURIComponent(username)}`);
   }
 
+  function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    submitUsername(value);
+  }
+
   function handleChange(newValue: string) {
     setValue(newValue);
-    // Clear error as user types (after first submit attempt)
     if (error) {
       const validationError = validateUsername(newValue.trim());
       setError(validationError);
     }
+  }
+
+  function handleDemoClick(handle: string) {
+    setValue(handle);
+    submitUsername(handle);
   }
 
   return (
@@ -93,7 +116,14 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
             GitHub username
           </label>
 
-          <div style={{ display: "flex", gap: "8px", alignItems: "center" }}>
+          <div
+            style={{
+              display: "flex",
+              gap: "8px",
+              alignItems: "center",
+              flexWrap: "wrap",
+            }}
+          >
             {/* @ prefix */}
             <span
               aria-hidden="true"
@@ -107,13 +137,13 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
               @
             </span>
 
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: "1 1 180px", minWidth: 0 }}>
               <input
                 id="github-username"
                 type="text"
                 value={value}
                 onChange={(e) => handleChange(e.target.value)}
-                placeholder="buildwithroopesh"
+                placeholder="torvalds"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="none"
@@ -140,7 +170,7 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
 
             <button
               type="submit"
-              disabled={isLoading || !value.trim()}
+              disabled={isLoading}
               aria-label={
                 isLoading ? "Analyzing profile…" : "Analyze GitHub profile"
               }
@@ -149,11 +179,11 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
                 border: "none",
                 borderRadius: "8px",
                 color: "#0E1012",
-                cursor: isLoading || !value.trim() ? "not-allowed" : "pointer",
+                cursor: isLoading ? "not-allowed" : "pointer",
                 fontFamily: "var(--font-sans)",
                 fontSize: isLarge ? "15px" : "14px",
                 fontWeight: 600,
-                opacity: isLoading || !value.trim() ? 0.5 : 1,
+                opacity: isLoading ? 0.6 : 1,
                 padding: isLarge ? "14px 28px" : "10px 20px",
                 transition: "background-color 150ms, opacity 150ms",
                 whiteSpace: "nowrap",
@@ -181,8 +211,63 @@ export function UsernameForm({ onSubmit, size = "default" }: UsernameFormProps) 
             id="username-hint"
             style={{ color: "#7B838D", fontSize: "12px" }}
           >
-            Enter your GitHub username to analyze your public repositories.
+            Enter a public GitHub username to analyze public repository activity.
           </p>
+        )}
+
+        {/* Quick-select convenience handles */}
+        {showExamples && demoHandles.length > 0 && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "8px",
+              marginTop: "4px",
+            }}
+          >
+            <span
+              style={{
+                color: "#7B838D",
+                fontSize: "12px",
+                fontFamily: "var(--font-sans)",
+              }}
+            >
+              Try an example:
+            </span>
+            <div
+              style={{
+                display: "inline-flex",
+                flexWrap: "wrap",
+                gap: "6px",
+              }}
+              role="group"
+              aria-label="Example GitHub usernames"
+            >
+              {demoHandles.map((handle) => (
+                <button
+                  key={handle}
+                  type="button"
+                  onClick={() => handleDemoClick(handle)}
+                  disabled={isLoading}
+                  style={{
+                    backgroundColor: "#1A1E22",
+                    border: "1px solid #2A2F35",
+                    borderRadius: "6px",
+                    color: "#A5ABB3",
+                    cursor: isLoading ? "not-allowed" : "pointer",
+                    fontFamily: "var(--font-mono)",
+                    fontSize: "12px",
+                    padding: "3px 8px",
+                    transition: "color 150ms, border-color 150ms",
+                  }}
+                  aria-label={`Analyze example user @${handle}`}
+                >
+                  @{handle}
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </div>
     </form>

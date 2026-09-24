@@ -146,4 +146,16 @@ Aggregate into TechnologyProfile & ProfileAnalysisResult
 - The pipeline requires an explicit injected `now: Date`.
 - Wall-clock runtime duration (`durationMs`) is stored in execution metadata for diagnostics only; it never affects the domain profile, status, scoring, or ordering.
 
+---
+
+## 6. Presentation & Integration Layer (`src/components/`, `src/lib/profile.ts`)
+
+Milestone 6 provides the user interface for executing and displaying profile analyses:
+- **Server Data Loader (`src/lib/profile.ts`)**: Wraps `analyzeProfile` on the server using `getGitHubClient()`, safely returning a discriminated union state and preventing uncaught server exceptions.
+- **Landing Page (`src/app/page.tsx`)**: Developer-focused hero, quick demo handles, and privacy/trust disclosures.
+- **Profile Page (`src/app/profile/[username]/page.tsx`)**: Server Component rendering `ProfileHeader`, `AnalysisSummary`, `LanguageFootprintCard`, `TechnologyFootprintCard`, `RepositoryList`, or `ProfileErrorState`.
+- **Loading Skeleton (`src/app/profile/[username]/loading.tsx`)**: Dedicated App Router streaming fallback.
+- **A11y & Guardrails**: Accessible ARIA roles, responsive to 375px, dark mode tokens, and strictly enforces data honesty without subjective skill terminology.
+
+
 

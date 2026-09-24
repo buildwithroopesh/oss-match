@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "OSS Match — Find open-source issues that match your experience",
+  description:
+    "OSS Match analyzes your public GitHub repositories to build a verified technology footprint and match relevant open-source issues.",
 };
 
 /* ─────────────────────────────────────────────────────────────────────────────
@@ -15,19 +17,19 @@ const HOW_IT_WORKS = [
     step: "01",
     title: "Enter your GitHub username",
     description:
-      "OSS Match analyzes your public repositories. No account required. No OAuth. Just your username.",
+      "OSS Match analyzes your public repositories. No account required. No OAuth. Just your public handle.",
   },
   {
     step: "02",
     title: "Build your technology footprint",
     description:
-      "We aggregate language byte counts, detect frameworks and tools from real evidence — package manifests, config files, repository topics.",
+      "We aggregate language byte counts and detect frameworks and tools from real evidence — package manifests, config files, and repository metadata.",
   },
   {
     step: "03",
     title: "Discover matched issues",
     description:
-      "A deterministic scoring algorithm matches open issues to your footprint. Every recommendation comes with a transparent explanation.",
+      "A deterministic scoring engine will match open issues to your verified footprint with transparent explanations (coming in next milestones).",
   },
 ];
 
@@ -126,36 +128,37 @@ export default function LandingPage() {
                 fontSize: "clamp(15px, 2.5vw, 18px)",
                 lineHeight: 1.65,
                 maxWidth: "560px",
-                margin: "0 auto 48px",
+                margin: "0 auto 40px",
               }}
             >
               OSS Match analyzes your public GitHub repositories to build a
-              technology footprint, then surfaces open issues you can
+              verified technology footprint, then surfaces open issues you can
               realistically contribute to — with a transparent explanation of
               why each one matches.
             </p>
 
-            {/* Username form */}
+            {/* Username form with quick examples */}
             <div
               style={{
-                maxWidth: "520px",
+                maxWidth: "540px",
                 margin: "0 auto",
                 textAlign: "left",
               }}
             >
-              <UsernameForm size="large" />
+              <UsernameForm size="large" showExamples={true} />
             </div>
 
-            {/* Social proof disclaimer — no fake numbers */}
+            {/* Social proof & privacy disclaimer */}
             <p
               style={{
                 color: "#7B838D",
                 fontSize: "12px",
-                marginTop: "20px",
+                marginTop: "24px",
+                lineHeight: 1.5,
               }}
             >
-              Reads only public repository data · No account required · No data
-              stored
+              Reads only public repository data · No account or OAuth required ·
+              Rate limits apply to unauthenticated requests
             </p>
           </div>
         </section>
@@ -198,7 +201,7 @@ export default function LandingPage() {
                   textTransform: "uppercase",
                 }}
               >
-                Technology Footprint
+                Technology Footprint Preview
               </h2>
               <span
                 style={{
@@ -210,14 +213,21 @@ export default function LandingPage() {
                   borderRadius: "4px",
                   padding: "2px 8px",
                 }}
-                aria-label="This is an example, not real data"
+                aria-label="This is an illustrative preview"
               >
                 Example
               </span>
             </div>
 
             {/* Footprint bars */}
-            <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "12px" }}>
+            <ul
+              style={{
+                listStyle: "none",
+                display: "flex",
+                flexDirection: "column",
+                gap: "12px",
+              }}
+            >
               {EXAMPLE_FOOTPRINT.map(({ lang, pct, color }) => (
                 <li key={lang}>
                   <div
@@ -229,7 +239,11 @@ export default function LandingPage() {
                     }}
                   >
                     <div
-                      style={{ display: "flex", alignItems: "center", gap: "8px" }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        gap: "8px",
+                      }}
                     >
                       <span
                         style={{
@@ -299,7 +313,7 @@ export default function LandingPage() {
               }}
             >
               Percentages represent proportion of analyzed code by byte count,
-              not skill level.
+              not skill level or proficiency.
             </p>
           </div>
         </section>
@@ -428,22 +442,22 @@ export default function LandingPage() {
                 {
                   term: "Technology footprint",
                   description:
-                    "Language percentages represent proportion of analyzed code by byte count. They reflect activity, not expertise.",
+                    "Language percentages represent proportion of analyzed code by byte count. They reflect observable activity, not subjective expertise.",
                 },
                 {
-                  term: "Evidence-based matching",
+                  term: "Evidence-based detection",
                   description:
-                    "Issues are matched to detected technologies using a deterministic algorithm with visible weights.",
+                    "Technologies are detected from observable signals — package manifests, configuration files, and repository metadata.",
                 },
                 {
-                  term: "No AI required",
+                  term: "Deterministic matching",
                   description:
-                    "V1 matching is fully deterministic. The same input always produces the same output.",
+                    "Matching uses a transparent, deterministic algorithm with visible weights. The same repository data always produces the same profile.",
                 },
                 {
                   term: "Public data only",
                   description:
-                    "OSS Match reads only public GitHub repositories. No private data is accessed or stored.",
+                    "OSS Match reads only public GitHub repositories. No private data is accessed, stored, or required.",
                 },
               ].map(({ term, description }) => (
                 <div key={term}>
@@ -488,7 +502,7 @@ export default function LandingPage() {
               marginBottom: "16px",
             }}
           >
-            Ready to find your next contribution?
+            Ready to analyze your repository footprint?
           </h2>
           <p
             style={{
@@ -497,13 +511,13 @@ export default function LandingPage() {
               marginBottom: "32px",
             }}
           >
-            Enter your GitHub username and see which issues match your
-            technology footprint.
+            Enter your GitHub username to inspect your language breakdown and
+            detected technologies.
           </p>
           <div
             style={{ maxWidth: "480px", margin: "0 auto", textAlign: "left" }}
           >
-            <UsernameForm />
+            <UsernameForm showExamples={true} />
           </div>
         </section>
       </main>
