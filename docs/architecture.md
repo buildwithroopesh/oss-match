@@ -180,3 +180,15 @@ Milestone 8 introduces the deterministic, explainable matching engine that evalu
 - **Data Honesty Invariant**: Grounded strictly in observable facts with zero claims of personal expertise, zero AI/LLM heuristics, and zero machine-guessed difficulty.
 - **Deterministic Ranking**: Sorts by score descending, recency of update ascending, and issue ID ascending as a stable secondary tie-breaker.
 - **Factual Explanation Generator**: Powers transparent explanations detailing matched technologies, languages, topics, suitability highlights, and gaps.
+
+---
+
+## 9. Recommendations UI & Integration Layer (`src/components/recommendations/`, `src/lib/recommendations.ts`)
+
+Milestone 9 presents ranked issue recommendations in a developer-focused user interface:
+- **Server Data Loader (`src/lib/recommendations.ts`)**: Orchestrates `analyzeProfile`, `discoverIssues`, and `matchIssues` in a single server pass. Formulates the broadest sensible deterministic V1 discovery criteria (`state: "open"`, `excludeArchived: true`, `limit: 30`, with no restrictive language qualifiers and no "good first issue only" restriction) to preserve cross-language technology and topic candidate recall, delegating matching to Milestone 8. Caps discovery at 30 issues and handles partial discovery or rate limits with graceful degradation.
+- **Recommendations Section (`src/components/recommendations/MatchedIssuesSection.tsx`)**: Prominently displays matched issues directly below the profile analysis summary. Provides client-side filtering by primary language, minimum score threshold, and contributor-friendly labels while preserving the matching engine's deterministic ranking order.
+- **Issue Card (`src/components/recommendations/IssueCard.tsx`)**: Renders repo, issue number, title, "Match score" badge, observable evidence badges (technologies from labels, primary language with "% of analyzed code", repository topics, and contributor invitation), factual engine explanations, and direct link to GitHub.
+- **Data Honesty Invariant**: Enforces strict terminology across all badges and empty states: always "Match score", "% of analyzed code volume", and objective reasons. Zero claims of personal skill, competency, or compatibility.
+- **Graceful Edge States**: Dedicated components for zero discovered issues, filter emptiness with reset controls, and partial discovery warning banners.
+

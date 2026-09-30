@@ -79,6 +79,36 @@ export function ProfileSkeleton() {
         ))}
       </div>
 
+      {/* Matched Issues Skeleton */}
+      <div
+        style={{
+          backgroundColor: "#15181B",
+          border: "1px solid #2A2F35",
+          borderRadius: "12px",
+          padding: "24px 28px",
+          marginBottom: "24px",
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+        }}
+      >
+        <div style={{ ...pulseStyle, width: "240px", height: "22px" }} />
+        <div style={{ ...pulseStyle, width: "380px", height: "14px" }} />
+        <div style={{ ...pulseStyle, width: "100%", height: "40px", borderRadius: "8px" }} />
+        {[1, 2].map((i) => (
+          <div
+            key={i}
+            style={{
+              backgroundColor: "#101214",
+              border: "1px solid #20252A",
+              borderRadius: "8px",
+              padding: "18px 20px",
+              height: "120px",
+            }}
+          />
+        ))}
+      </div>
+
       {/* Language Footprint Skeleton */}
       <div
         style={{

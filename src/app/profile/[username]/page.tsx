@@ -9,7 +9,8 @@ import {
   EmptyProfileCard,
   ProfileErrorState,
 } from "@/components/profile";
-import { getProfileAnalysis } from "@/lib/profile";
+import { MatchedIssuesSection } from "@/components/recommendations";
+import { getProfileAndRecommendations } from "@/lib/recommendations";
 import type { Metadata } from "next";
 
 interface ProfilePageProps {
@@ -22,23 +23,23 @@ export async function generateMetadata({
   const { username } = await params;
   const decoded = decodeURIComponent(username);
   return {
-    title: `@${decoded} — Profile Analysis | OSS Match`,
-    description: `Technology footprint and public repository analysis for GitHub user @${decoded}.`,
+    title: `@${decoded} — Profile Analysis & Matched Issues | OSS Match`,
+    description: `Technology footprint, public repository analysis, and matched open-source issues for GitHub user @${decoded}.`,
   };
 }
 
 /**
- * Profile Analysis Page — /profile/[username]
+ * Profile Analysis & Recommendations Page — /profile/[username]
  *
- * Server Component executing the profile analysis pipeline.
- * Fully renders verified GitHub user profile, language footprint,
- * detected technologies, and analyzed repositories.
+ * Server Component executing profile analysis, issue discovery, and matching.
+ * Renders verified GitHub user profile, matched open-source issues,
+ * language footprint, detected technologies, and analyzed repositories.
  */
 export default async function ProfilePage({ params }: ProfilePageProps) {
   const { username } = await params;
   const decodedUsername = decodeURIComponent(username);
 
-  const analysisState = await getProfileAnalysis(decodedUsername);
+  const state = await getProfileAndRecommendations(decodedUsername);
 
   return (
     <div
@@ -62,39 +63,44 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
           width: "100%",
         }}
       >
-        {analysisState.status === "error" ? (
+        {state.status === "error" ? (
           <ProfileErrorState
-            error={analysisState.error}
+            error={state.error}
             username={decodedUsername}
           />
         ) : (
           <>
             <ProfileHeader
-              user={analysisState.data.user}
-              metadata={analysisState.data.metadata}
+              user={state.profile.user}
+              metadata={state.profile.metadata}
             />
 
             <AnalysisSummary
-              metadata={analysisState.data.metadata}
+              metadata={state.profile.metadata}
               totalLanguagesCount={
-                analysisState.data.languageFootprint.uniqueLanguagesCount
+                state.profile.languageFootprint.uniqueLanguagesCount
               }
             />
 
-            {analysisState.data.repositories.length === 0 ? (
-              <EmptyProfileCard username={analysisState.data.user.login} />
+            {state.profile.repositories.length === 0 ? (
+              <EmptyProfileCard username={state.profile.user.login} />
             ) : (
               <>
+                <MatchedIssuesSection
+                  recommendations={state.recommendations}
+                  discovery={state.discovery}
+                />
+
                 <LanguageFootprintCard
-                  footprint={analysisState.data.languageFootprint}
+                  footprint={state.profile.languageFootprint}
                 />
 
                 <TechnologyFootprintCard
-                  technologies={analysisState.data.technologies}
+                  technologies={state.profile.technologies}
                 />
 
                 <RepositoryList
-                  repositories={analysisState.data.repositories}
+                  repositories={state.profile.repositories}
                 />
               </>
             )}
