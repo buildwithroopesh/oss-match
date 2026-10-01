@@ -144,7 +144,6 @@ oss-match/
 │       └── types/         Shared type definitions
 ├── tests/                 Offline tests (no GitHub token required)
 ├── docs/                  Architecture documentation
-├── scripts/               Record fixtures, utilities
 └── .github/               CI, issue templates, PR template
 ```
 

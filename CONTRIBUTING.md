@@ -141,12 +141,7 @@ All four must pass before merge.
 
 ## Data Honesty
 
-OSS Match never fabricates data. Development fixtures are recorded from real GitHub responses using `scripts/record-fixtures.ts` and are clearly labeled as fixtures.
-
-If you add fixtures, they must:
-- Come from real GitHub responses
-- Contain no secrets or tokens
-- Be clearly labeled as fixtures in the UI if displayed
+OSS Match never fabricates data. Tests run offline using deterministic mock data, and live application flows use authentic data fetched from GitHub's public API. All test data and mocks must contain no secrets or credentials.
 
 ---
 

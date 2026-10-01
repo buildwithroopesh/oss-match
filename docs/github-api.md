@@ -114,22 +114,7 @@ For repository fetching (`getRepositories`):
 
 ---
 
-## 8. Fixture Recording (`scripts/record-fixtures.ts`)
-
-Sanitized development fixtures can be recorded using:
-
-```bash
-npx tsx scripts/record-fixtures.ts [username]
-```
-
-### Sanitization Guarantee
-- Sensitive tokens and authorization headers are never recorded.
-- Private emails are automatically redacted to `[REDACTED]`.
-- Output is saved to `tests/fixtures/` with explicit `_fixtureMetadata` annotations.
-
----
-
-## 9. Security Considerations
+## 8. Security Considerations
 
 - **Server-Side Only**: `GITHUB_API_TOKEN` must only be accessed in Node.js server environments (`src/lib/github.ts` or API routes).
 - **No Client Exposure**: Never prefix server secrets with `NEXT_PUBLIC_`.
