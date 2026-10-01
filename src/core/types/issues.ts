@@ -47,6 +47,10 @@ export interface IssueSearchCriteria {
   perPage?: number;
   /** Reference time for deterministic calculations (default: new Date()) */
   now?: Date;
+  /** Whether to hydrate parent repository metadata (topics, language, stars, etc.) (default: true) */
+  hydrateRepositories?: boolean;
+  /** Concurrency cap for repository metadata hydration (default: 5, max: 10) */
+  concurrency?: number;
 }
 
 /** Observable suitability facts extracted from an issue for later matching */

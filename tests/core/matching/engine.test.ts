@@ -240,4 +240,57 @@ describe("Matching Engine", () => {
 
     expect(run1).toEqual(run2);
   });
+
+  // ───────────────────────────────────────────────────────────────────────────
+  // Regression Test: Prevention of 96.0 Score Inflation via Hydrated Signals
+  // ───────────────────────────────────────────────────────────────────────────
+
+  it("regression: prevents artificial 96.0 inflation by properly incorporating hydrated repository language and framework signals", () => {
+    // User profile: primarily TypeScript (80%) + React framework
+    const profile = createMockProfile({
+      technologies: [
+        {
+          id: "react",
+          name: "React",
+          category: "framework",
+          evidenceLevel: "strong",
+          evidenceSummary: [],
+          evidence: [],
+          repositoryCount: 1,
+          repositories: ["repo"],
+          mostRecentAt: "2026-09-24T00:00:00Z",
+          daysSinceMostRecent: 0,
+        },
+      ],
+      languageFootprint: [
+        { language: "TypeScript", bytes: 80000, percentage: 80, rawPercentage: 80, color: "#3178C6" },
+        { language: "JavaScript", bytes: 20000, percentage: 20, rawPercentage: 20, color: "#F7DF1E" },
+      ],
+    });
+
+    // Unrelated issue (written in Rust, no React topic)
+    const unrelatedIssueWithHydratedRepo = createMockDiscoveredIssue({
+      id: 991,
+      primaryLanguage: "Rust",
+      repositoryTopics: ["cargo", "systems"],
+      labels: ["bug"],
+      daysSinceUpdated: 1,
+      commentsCount: 2,
+      body: "A sufficiently long issue description text for testing.",
+    });
+
+    const match = matchIssue(profile, unrelatedIssueWithHydratedRepo, { now: referenceNow });
+
+    // Language and framework are available and evaluate to 0.0, dragging down the score
+    expect(match.components.language.isAvailable).toBe(true);
+    expect(match.components.language.score).toBe(0.0);
+    expect(match.components.framework.isAvailable).toBe(true);
+    expect(match.components.framework.score).toBe(0.0);
+
+    // Score is honestly penalized (< 35), NOT inflated to 96.0 with omitted components
+    expect(match.score).toBeLessThan(35);
+    expect(match.explanation.unavailableComponents).not.toContain("language");
+    expect(match.explanation.unavailableComponents).not.toContain("framework");
+  });
 });
+

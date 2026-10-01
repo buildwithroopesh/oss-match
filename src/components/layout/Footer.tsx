@@ -104,9 +104,9 @@ export default function Footer() {
           <span>Open source — MIT License</span>
           <span
             style={{ fontFamily: "var(--font-mono)" }}
-            aria-label="Project version milestone 1"
+            aria-label="Project version v0.1.0"
           >
-            v0.1.0 — Milestone 1
+            v0.1.0
           </span>
         </div>
       </div>

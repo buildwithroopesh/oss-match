@@ -7,6 +7,7 @@
  */
 
 import type { GitHubClient } from "../github/client";
+import type { GitHubIssue, GitHubRepository } from "../types/github";
 import type {
   IssueSearchCriteria,
   IssueDiscoveryResult,
@@ -64,7 +65,7 @@ export async function discoverIssues(
   }
 
   // 3. Execution state
-  const discovered: DiscoveredIssue[] = [];
+  const candidateRawIssues: GitHubIssue[] = [];
   const seenIds = new Set<number>();
   const warnings: string[] = [];
   let currentPage = startPage;
@@ -73,7 +74,7 @@ export async function discoverIssues(
   let isPartial = false;
 
   // 4. Paginate until targetLimit is reached or results exhausted
-  while (discovered.length < targetLimit) {
+  while (candidateRawIssues.length < targetLimit) {
     let searchResult;
     try {
       searchResult = await client.searchIssues(query, {
@@ -92,7 +93,7 @@ export async function discoverIssues(
       isPartial = true;
       if (err instanceof GitHubRateLimitError) {
         warnings.push(
-          `GitHub rate limit reached on page ${currentPage}. Returning ${discovered.length} issues collected before rate limit.`
+          `GitHub rate limit reached on page ${currentPage}. Returning ${candidateRawIssues.length} issues collected before rate limit.`
         );
       } else {
         const msg = err instanceof Error ? err.message : String(err);
@@ -108,20 +109,16 @@ export async function discoverIssues(
       break;
     }
 
-    // Deduplicate and extract signals
+    // Deduplicate candidate issues
     for (const rawIssue of searchResult.issues) {
       if (seenIds.has(rawIssue.id)) {
         continue;
       }
 
       seenIds.add(rawIssue.id);
-      const signals = extractIssueSignals(rawIssue, now);
-      discovered.push({
-        issue: rawIssue,
-        signals,
-      });
+      candidateRawIssues.push(rawIssue);
 
-      if (discovered.length >= targetLimit) {
+      if (candidateRawIssues.length >= targetLimit) {
         break;
       }
     }
@@ -139,7 +136,77 @@ export async function discoverIssues(
     currentPage += 1;
   }
 
-  // 5. Stable deterministic sorting
+  // 5. Hydrate repository metadata (language, topics, stars, forks, isArchived)
+  // GitHub's GET /search/issues only provides repository_url without repository metadata.
+  // Hydrating unique repositories ensures the downstream matching engine receives real language
+  // and framework/topic signals instead of omitting those components.
+  const shouldHydrate =
+    criteria.hydrateRepositories !== false &&
+    typeof client.getRepository === "function";
+
+  if (shouldHydrate && candidateRawIssues.length > 0) {
+    const uniqueRepos = new Map<string, { owner: string; name: string }>();
+    for (const rawIssue of candidateRawIssues) {
+      const owner = rawIssue.repository.owner;
+      const name = rawIssue.repository.name;
+      if (owner && name && !uniqueRepos.has(`${owner}/${name}`)) {
+        uniqueRepos.set(`${owner}/${name}`, { owner, name });
+      }
+    }
+
+    const repoList = Array.from(uniqueRepos.values());
+    const repoDataMap = new Map<string, GitHubRepository>();
+    const concurrency = Math.max(1, Math.min(criteria.concurrency ?? 5, 10));
+
+    for (let i = 0; i < repoList.length; i += concurrency) {
+      const chunk = repoList.slice(i, i + concurrency);
+      const results = await Promise.all(
+        chunk.map(async ({ owner, name }) => {
+          try {
+            const data = await client.getRepository(owner, name);
+            return { key: `${owner}/${name}`, data, error: null };
+          } catch (err) {
+            return { key: `${owner}/${name}`, data: null, error: err };
+          }
+        })
+      );
+
+      for (const res of results) {
+        if (res.data) {
+          repoDataMap.set(res.key, res.data);
+        } else if (res.error instanceof GitHubRateLimitError) {
+          warnings.push(
+            `Rate limit reached while hydrating repository "${res.key}". Proceeding with partial repository data.`
+          );
+        }
+      }
+    }
+
+    // Apply hydrated repository metadata to matching issues
+    for (const rawIssue of candidateRawIssues) {
+      const key = `${rawIssue.repository.owner}/${rawIssue.repository.name}`;
+      const repoData = repoDataMap.get(key);
+      if (repoData) {
+        rawIssue.repository = {
+          ...rawIssue.repository,
+          primaryLanguage: repoData.primaryLanguage,
+          topics: repoData.topics,
+          stars: repoData.stars,
+          forks: repoData.forks,
+          isArchived: repoData.isArchived,
+          description: repoData.description ?? rawIssue.repository.description,
+        };
+      }
+    }
+  }
+
+  // 6. Extract observable suitability signals
+  const discovered: DiscoveredIssue[] = candidateRawIssues.map((rawIssue) => ({
+    issue: rawIssue,
+    signals: extractIssueSignals(rawIssue, now),
+  }));
+
+  // 7. Stable deterministic sorting
   // Preserve primary API order (updated/created desc), and apply stable tie-breaker on issue ID
   const sorted = [...discovered].sort((a, b) => {
     // Primary: compare timestamps if sorting by updated/created

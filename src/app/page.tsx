@@ -29,7 +29,7 @@ const HOW_IT_WORKS = [
     step: "03",
     title: "Discover matched issues",
     description:
-      "A deterministic scoring engine will match open issues to your verified footprint with transparent explanations (coming in next milestones).",
+      "A deterministic scoring engine matches open issues to your verified footprint with transparent explanations and evidence breakdown.",
   },
 ];
 
