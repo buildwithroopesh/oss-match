@@ -297,8 +297,9 @@ export class GitHubClient {
       );
     }
 
-    // Secondary rate limit: 403 or 429 where response/error message indicates secondary rate limiting
-    if ((response.status === 403 || response.status === 429) && (indicatesSecondaryRateLimit || response.status === 429)) {
+    // Secondary rate limit: any 429, or 403 where the response message explicitly
+    // indicates secondary rate limiting (not a primary limit exhaustion).
+    if (response.status === 429 || (response.status === 403 && indicatesSecondaryRateLimit)) {
       // Conservative bounded retry for transient secondary limits when no retry-after is provided
       if (onRetry && !hasRetryAfter) {
         const retryResult = await onRetry();

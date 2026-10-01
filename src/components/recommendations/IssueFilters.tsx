@@ -122,6 +122,7 @@ export default function IssueFilters({
 
         {/* Contributor-friendly Checkbox */}
         <label
+          htmlFor="filter-friendly"
           style={{
             display: "inline-flex",
             alignItems: "center",
@@ -133,6 +134,7 @@ export default function IssueFilters({
           }}
         >
           <input
+            id="filter-friendly"
             type="checkbox"
             checked={friendlyOnly}
             onChange={(e) => onToggleFriendlyOnly(e.target.checked)}

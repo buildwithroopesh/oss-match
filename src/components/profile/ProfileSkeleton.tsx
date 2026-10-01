@@ -3,6 +3,8 @@
  *
  * Provides an accessible, animated placeholder layout while profile analysis runs.
  */
+import React from "react";
+
 export function ProfileSkeleton() {
   const pulseStyle: React.CSSProperties = {
     backgroundColor: "#1A1E22",
@@ -43,10 +45,10 @@ export function ProfileSkeleton() {
             flexShrink: 0,
           }}
         />
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px" }}>
-          <div style={{ ...pulseStyle, width: "200px", height: "24px" }} />
-          <div style={{ ...pulseStyle, width: "320px", height: "16px" }} />
-          <div style={{ ...pulseStyle, width: "160px", height: "14px" }} />
+        <div style={{ flex: 1, display: "flex", flexDirection: "column", gap: "10px", overflow: "hidden" }}>
+          <div style={{ ...pulseStyle, maxWidth: "200px", width: "60%", height: "24px" }} />
+          <div style={{ ...pulseStyle, maxWidth: "320px", width: "85%", height: "16px" }} />
+          <div style={{ ...pulseStyle, maxWidth: "160px", width: "45%", height: "14px" }} />
         </div>
       </div>
 

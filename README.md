@@ -16,7 +16,7 @@ It does not simply list "Good First Issues." It analyzes your public repositorie
 
 ## Live Demo
 
-> Coming in Milestone 6.
+Run the app locally following the [Local Setup](#local-setup) instructions below.
 
 ---
 
@@ -68,7 +68,7 @@ The V1 algorithm uses a weighted sum of scoring components:
 | Issue freshness | 5% |
 | Difficulty estimate | 5% |
 
-Weights are centralized in [`src/core/matching/weights.ts`](src/core/matching/weights.ts) and can be adjusted or extended.
+Weights are centralized in [`src/core/matching/constants.ts`](src/core/matching/constants.ts) and can be adjusted or extended.
 
 If data for a component is unavailable, it is excluded and the remaining weights are renormalized.
 
@@ -105,15 +105,20 @@ These are **evidence levels, not skill levels**.
 ```
 oss-match/
 ├── src/
-│   ├── app/               Next.js App Router (routes, API handlers)
+│   ├── app/               Next.js App Router (routes, pages)
 │   ├── components/        React components (UI only, no business logic)
+│   │   ├── layout/        Navbar, Footer
+│   │   ├── profile/       Profile header, language/technology cards, skeleton
+│   │   └── recommendations/  Issue cards, filters, empty states, banners
+│   ├── lib/               Server-side integration helpers (GitHub client factory,
+│   │                      profile analysis, recommendations orchestration)
 │   └── core/              Framework-independent business logic
-│       ├── github/        GitHub API client, validation, schemas
+│       ├── github/        GitHub API client, validation, schemas, cache, rate-limit
 │       ├── language/      Language aggregation and percentage calculation
 │       ├── technology/    Technology detection (registry + signals)
-│       ├── matching/      Scoring engine, weights, explainer
-│       ├── pipeline/      Analysis and recommendation pipelines
-│       ├── cache/         Simple in-memory cache
+│       ├── matching/      Scoring engine, weights (constants.ts), explainer
+│       ├── issues/        Issue discovery, query builder, signals extraction
+│       ├── pipeline/      Profile analysis pipeline and errors
 │       └── types/         Shared type definitions
 ├── tests/                 Offline tests (no GitHub token required)
 ├── docs/                  Architecture documentation
@@ -225,7 +230,7 @@ See [CONTRIBUTING.md](CONTRIBUTING.md).
 ## Roadmap
 
 - **V1** (current): Deterministic matching, technology detection, profile page, issue cards
-- **V2**: AI issue explanation, contribution roadmap, improved difficulty estimation
+- **V2**: Enhanced explanations, contribution roadmap, improved difficulty estimation
 - **V3**: GitHub OAuth, saved issues, personalized dashboard
 - **V4**: `npx oss-match` CLI (reuses the same core matching engine)
 - **V5**: Browser extension, additional Git hosting platforms
