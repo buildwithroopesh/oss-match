@@ -4,6 +4,7 @@
  * Provides an accessible, animated placeholder layout while profile analysis runs.
  */
 import React from "react";
+import LatticeLoader from "@/components/ui/LatticeLoader";
 
 export function ProfileSkeleton() {
   const pulseStyle: React.CSSProperties = {
@@ -23,6 +24,35 @@ export function ProfileSkeleton() {
         width: "100%",
       }}
     >
+      {/* Profile Analysis Status */}
+      <div
+        style={{
+          backgroundColor: "#15181B",
+          border: "1px solid #2A2F35",
+          borderRadius: "8px",
+          padding: "12px 20px",
+          marginBottom: "20px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "flex-start",
+        }}
+      >
+        <LatticeLoader
+          label="Analyzing GitHub profile"
+          doneLabel="Done in"
+          errorLabel="Failed after"
+          status="working"
+          pattern="orbit"
+          grid={3}
+          shape="round"
+          color="#A5ABB3"
+          doneColor="#5CE1C6"
+          errorColor="#F06A6A"
+          glow={false}
+          showTimer
+        />
+      </div>
+
       {/* Header Skeleton */}
       <div
         style={{
@@ -94,8 +124,23 @@ export function ProfileSkeleton() {
           gap: "16px",
         }}
       >
-        <div style={{ ...pulseStyle, width: "240px", height: "22px" }} />
-        <div style={{ ...pulseStyle, width: "380px", height: "14px" }} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-start" }}>
+          <LatticeLoader
+            label="Finding matching issues"
+            doneLabel="Done in"
+            errorLabel="Failed after"
+            status="working"
+            pattern="orbit"
+            grid={3}
+            shape="round"
+            color="#A5ABB3"
+            doneColor="#5CE1C6"
+            errorColor="#F06A6A"
+            glow={false}
+            showTimer
+          />
+        </div>
+        <div style={{ ...pulseStyle, width: "380px", maxWidth: "90%", height: "14px" }} />
         <div style={{ ...pulseStyle, width: "100%", height: "40px", borderRadius: "8px" }} />
         {[1, 2].map((i) => (
           <div
