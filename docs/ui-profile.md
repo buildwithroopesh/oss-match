@@ -1,12 +1,12 @@
 # Landing & Profile UI Reference
 
-> Architecture, components, accessibility, and error handling for the OSS Match user interface (Milestone 6).
+> Architecture, components, accessibility, and error handling for the OSS Match user interface.
 
 ---
 
 ## 1. Overview & User Flow
 
-Milestone 6 integrates the core pipeline from Milestones 1–5 into an accessible, developer-focused web application.
+The presentation layer integrates the core analysis and discovery pipelines into an accessible, developer-focused web application.
 
 ```
 Landing Page (/)

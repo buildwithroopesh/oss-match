@@ -6,7 +6,7 @@
 
 ## 1. Overview & Architectural Boundaries
 
-Issue discovery is the bridge between verified developer technology footprints and open-source contribution opportunities. It searches GitHub's public issue corpus using structured search qualifiers, deduplicates results across pages, extracts verifiable suitability signals, and produces deterministically ordered candidate issues for the matching engine (Milestone 8).
+Issue discovery is the bridge between verified developer technology footprints and open-source contribution opportunities. It searches GitHub's public issue corpus using structured search qualifiers, deduplicates results across pages, extracts verifiable suitability signals, and produces deterministically ordered candidate issues for the matching engine (`src/core/matching/`).
 
 ```
 IssueSearchCriteria
@@ -26,7 +26,7 @@ IssueDiscoveryResult (DiscoveredIssue[] + DiscoveryMetadata)
 
 ### Architectural Rules
 - Located under `src/core/issues/` with zero dependencies on React, Next.js, browser APIs, or UI imports.
-- Reuses the centralized `GitHubClient` transport layer from Milestone 2.
+- Reuses the centralized `GitHubClient` transport layer (`src/core/github/`).
 - Zero secrets in core: API credentials remain injected.
 
 ---
@@ -57,7 +57,7 @@ The query builder translates high-level search options into valid GitHub search 
 
 ## 3. Observable Suitability Signals (`IssueSignals`)
 
-The signal extractor (`extractIssueSignals`) captures observable facts that the downstream matching engine (Milestone 8) uses to evaluate issue fit:
+The signal extractor (`extractIssueSignals`) captures observable facts that the downstream matching engine (`src/core/matching/`) uses to evaluate issue fit:
 
 - **Body presence & length**: `hasBody: boolean`, `bodyLength: number`.
 - **Labels**: `labelNames: string[]` (normalized lowercase), `hasHelpWantedOrGoodFirstIssue: boolean`.
@@ -86,7 +86,7 @@ The signal extractor (`extractIssueSignals`) captures observable facts that the 
 
 ## 6. Explicit Non-Goals (What This Layer Intentionally Does NOT Decide)
 
-1. **No Match Scoring**: Does not score how well an issue matches a user. Final scoring belongs in Milestone 8 (`src/core/matching/`).
+1. **No Match Scoring**: Does not score how well an issue matches a user. Final scoring belongs in the matching engine (`src/core/matching/`).
 2. **No Ranking / Recommendations**: Does not sort issues by perceived recommendation strength.
 3. **No Contributor Skill Inference**: Does not claim an issue is "easy" or "hard" based on assumptions; only records observable labels.
 4. **No Data Fabrication**: Does not hallucinate missing repository topics or languages.

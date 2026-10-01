@@ -3,7 +3,7 @@
 > Module: `src/core/pipeline/`
 > Framework status: Pure TypeScript, framework-independent, 100% offline testable.
 
-The Profile Analysis Pipeline connects the GitHub API client (Milestone 2), language footprint aggregator (Milestone 3), and technology detection engine (Milestone 4) into a unified, deterministic pipeline producing an audited `ProfileAnalysisResult`.
+The Profile Analysis Pipeline connects the GitHub API client (`src/core/github/`), language footprint aggregator (`src/core/language/`), and technology detection engine (`src/core/technology/`) into a unified, deterministic pipeline producing an audited `ProfileAnalysisResult`.
 
 ```mermaid
 flowchart TD

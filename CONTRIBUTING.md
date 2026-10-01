@@ -27,15 +27,16 @@ npm run dev
 
 ```
 src/
-├── app/               Next.js routes and API handlers (thin layer)
-├── components/        React UI components — no business logic
+├── app/               Next.js App Router (pages, layouts)
+├── components/        React UI components (profile, recommendations, layout)
+├── lib/               Server integration helpers (GitHub client, recommendations)
 └── core/              Framework-independent business logic
-    ├── github/        GitHub API client (all GitHub access goes here)
+    ├── github/        GitHub API client, schemas, rate-limiting, cache
     ├── language/      Language aggregation and percentage calculation
     ├── technology/    Technology detection (registry + signals)
-    ├── matching/      Scoring engine and explainer
-    ├── pipeline/      Analysis and recommendation orchestration
-    ├── cache/         Simple in-memory cache
+    ├── issues/        Issue discovery, query builder, signals extraction
+    ├── matching/      Scoring engine, weights (constants.ts), explainer
+    ├── pipeline/      Profile analysis pipeline
     └── types/         Shared TypeScript types
 ```
 
@@ -109,7 +110,7 @@ Key properties:
 - **Renormalizing** — if data for a component is unavailable, it is excluded and weights are renormalized
 - **Stable sort** — tie-breaking uses `{score DESC, fullName ASC, issueNumber ASC}`
 
-Weights are in `src/core/matching/weights.ts`.
+Weights are in `src/core/matching/constants.ts`.
 
 ---
 

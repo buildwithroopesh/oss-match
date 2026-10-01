@@ -12,12 +12,14 @@ OSS Match enforces a strict architectural boundary between the UI, application i
 src/
 ├── app/               Next.js App Router (pages, layouts, route handlers)
 ├── components/        React presentation components (UI primitives, profile, issues)
-├── lib/               Application infrastructure layer (injects env vars like GITHUB_API_TOKEN)
+├── lib/               Application infrastructure layer (GitHub client, recommendations)
 └── core/              Framework-independent business logic (pure TypeScript)
     ├── github/        GitHub API client, boundary Zod schemas, rate-limiting, cache
     ├── language/      Language footprint aggregation & largest-remainder rounding
-    ├── technology/    (Milestone 4) Technology detection & registry
-    ├── matching/      (Milestone 8) Deterministic scoring engine & explainer
+    ├── technology/    Technology detection & registry
+    ├── issues/        Issue discovery, query builder, signals extraction
+    ├── matching/      Deterministic scoring engine & explainer
+    ├── pipeline/      Profile analysis pipeline
     └── types/         Normalized domain types
 ```
 
@@ -148,20 +150,20 @@ Aggregate into TechnologyProfile & ProfileAnalysisResult
 
 ---
 
-## 6. Presentation & Integration Layer (`src/components/`, `src/lib/profile.ts`)
+## 6. Presentation & Integration Layer (`src/components/`, `src/lib/recommendations.ts`)
 
-Milestone 6 provides the user interface for executing and displaying profile analyses:
-- **Server Data Loader (`src/lib/profile.ts`)**: Wraps `analyzeProfile` on the server using `getGitHubClient()`, safely returning a discriminated union state and preventing uncaught server exceptions.
+Provides the user interface for executing profile analyses and displaying recommendations:
+- **Server Data Loader (`src/lib/recommendations.ts`)**: Wraps `analyzeProfile`, `discoverIssues`, and `matchIssues` on the server using `getGitHubClient()`, safely returning a discriminated union state and preventing uncaught server exceptions. (A standalone profile loader is also available at `src/lib/profile.ts`).
 - **Landing Page (`src/app/page.tsx`)**: Developer-focused hero, quick demo handles, and privacy/trust disclosures.
-- **Profile Page (`src/app/profile/[username]/page.tsx`)**: Server Component rendering `ProfileHeader`, `AnalysisSummary`, `LanguageFootprintCard`, `TechnologyFootprintCard`, `RepositoryList`, or `ProfileErrorState`.
+- **Profile Page (`src/app/profile/[username]/page.tsx`)**: Server Component rendering `ProfileHeader`, `AnalysisSummary`, `LanguageFootprintCard`, `TechnologyFootprintCard`, `MatchedIssuesSection`, `RepositoryList`, or `ProfileErrorState`.
 - **Loading Skeleton (`src/app/profile/[username]/loading.tsx`)**: Dedicated App Router streaming fallback.
-- **A11y & Guardrails**: Accessible ARIA roles, responsive to 375px, dark mode tokens, and strictly enforces data honesty without subjective skill terminology.
+- **A11y & Guardrails**: Accessible ARIA roles, responsive down to 375px mobile viewports, dark mode tokens, and strictly enforces data honesty without subjective skill terminology.
 
 ---
 
 ## 7. Issue Discovery Engine (`src/core/issues/`)
 
-Milestone 7 introduces the issue discovery engine that queries GitHub's issue search API:
+The issue discovery engine queries GitHub's issue search API:
 - **Framework Independence**: Pure TypeScript under `src/core/issues/` with zero UI, browser, or framework imports.
 - **Query Builder (`buildIssueSearchQuery`)**: Compiles structured search criteria into valid GitHub search qualifiers (`is:issue`, `state:open`, `archived:false`, `language:`, `label:`, `repo:`, `updated:`, `comments:`).
 - **Observable Suitability Signals (`extractIssueSignals`)**: Extracts verifiable facts (body length, labels, timestamps, repository language, topics, stars, forks) without computing matching scores or inferring contributor skill.
@@ -172,7 +174,7 @@ Milestone 7 introduces the issue discovery engine that queries GitHub's issue se
 
 ## 8. Matching Engine (`src/core/matching/`)
 
-Milestone 8 introduces the deterministic, explainable matching engine that evaluates candidate issues against a verified technology profile:
+The deterministic, explainable matching engine evaluates candidate issues against a verified technology profile:
 - **Framework Independence**: Pure TypeScript under `src/core/matching/` operating strictly on already-normalized domain data with zero HTTP or UI dependencies.
 - **7 Baseline Scoring Components**: Technology (35%), Language (20%), Framework/Topic (15%), Issue Suitability (10%), Repository Activity (10%), Freshness (5%), and Difficulty (5%).
 - **Strict Evidence Separation**: Technology (35%) evaluates structured issue labels only (no title/body prose, no repository topics); Framework/Topic (15%) evaluates repository topics only against user framework/platform evidence (no issue labels). Zero double-counting between the two components.
@@ -185,8 +187,8 @@ Milestone 8 introduces the deterministic, explainable matching engine that evalu
 
 ## 9. Recommendations UI & Integration Layer (`src/components/recommendations/`, `src/lib/recommendations.ts`)
 
-Milestone 9 presents ranked issue recommendations in a developer-focused user interface:
-- **Server Data Loader (`src/lib/recommendations.ts`)**: Orchestrates `analyzeProfile`, `discoverIssues`, and `matchIssues` in a single server pass. Formulates the broadest sensible deterministic V1 discovery criteria (`state: "open"`, `excludeArchived: true`, `limit: 30`, with no restrictive language qualifiers and no "good first issue only" restriction) to preserve cross-language technology and topic candidate recall, delegating matching to Milestone 8. Caps discovery at 30 issues and handles partial discovery or rate limits with graceful degradation.
+Presents ranked issue recommendations in a developer-focused user interface:
+- **Server Data Loader (`src/lib/recommendations.ts`)**: Orchestrates `analyzeProfile`, `discoverIssues`, and `matchIssues` in a single server pass. Formulates the broadest sensible deterministic V1 discovery criteria (`state: "open"`, `excludeArchived: true`, `limit: 30`, with no restrictive language qualifiers and no "good first issue only" restriction) to preserve cross-language technology and topic candidate recall, delegating matching to the matching engine (`src/core/matching/`). Caps discovery at 30 issues and handles partial discovery or rate limits with graceful degradation.
 - **Recommendations Section (`src/components/recommendations/MatchedIssuesSection.tsx`)**: Prominently displays matched issues directly below the profile analysis summary. Provides client-side filtering by primary language, minimum score threshold, and contributor-friendly labels while preserving the matching engine's deterministic ranking order.
 - **Issue Card (`src/components/recommendations/IssueCard.tsx`)**: Renders repo, issue number, title, "Match score" badge, observable evidence badges (technologies from labels, primary language with "% of analyzed code", repository topics, and contributor invitation), factual engine explanations, and direct link to GitHub.
 - **Data Honesty Invariant**: Enforces strict terminology across all badges and empty states: always "Match score", "% of analyzed code volume", and objective reasons. Zero claims of personal skill, competency, or compatibility.

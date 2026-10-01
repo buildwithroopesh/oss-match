@@ -6,10 +6,11 @@
 
 ## 1. Overview & Architectural Boundaries
 
-The Matching Engine compares a developer's observed public engineering profile (`TechnologyProfile`, `LanguageFootprint`, `DetectedTechnology[]` from Milestone 5) against candidate open-source issues (`DiscoveredIssue[]` from Milestone 7).
+The Matching Engine compares a developer's observed public engineering profile (`TechnologyProfile`, `LanguageFootprint`, `DetectedTechnology[]`) against candidate open-source issues (`DiscoveredIssue[]`).
 
 ```
-TechnologyProfile (Milestone 5)        DiscoveredIssue[] (Milestone 7)
+TechnologyProfile                      DiscoveredIssue[]
+(src/core/pipeline/)                   (src/core/issues/)
        │                                       │
        └───────────────────┬───────────────────┘
                            │ + injected now: Date
@@ -123,9 +124,9 @@ Candidate issues are ranked using strict, deterministic criteria:
 
 ## 6. Non-Goals
 
-Milestone 8 explicitly does **not**:
-- Render matching results in the UI (deferred to Milestone 9).
-- Call external APIs or query GitHub directly (uses already discovered issues).
+The matching engine explicitly does **not**:
+- Render matching results in the UI (presentation is isolated to `src/components/recommendations/`).
+- Call external APIs or query GitHub directly (evaluates pre-discovered candidate issues).
 - Introduce artificial intelligence, large language models, or probabilistic heuristics.
 - Claim user mastery, skill level, or problem difficulty.
 - Filter out projects based on arbitrary star or fork minimums.

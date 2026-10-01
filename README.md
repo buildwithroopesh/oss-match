@@ -2,6 +2,9 @@
 
 **Find open-source issues that match your experience.**
 
+[![CI](https://github.com/buildwithroopesh/oss-match/actions/workflows/ci.yml/badge.svg)](https://github.com/buildwithroopesh/oss-match/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+
 > Not affiliated with GitHub, Inc. Uses only publicly available GitHub data.
 
 ---
@@ -14,43 +17,62 @@ It does not simply list "Good First Issues." It analyzes your public repositorie
 
 ---
 
-## Live Demo
+## Example Usage
 
-Run the app locally following the [Local Setup](#local-setup) instructions below.
+1. Start the local server (`npm run dev`) and visit [http://localhost:3000](http://localhost:3000).
+2. Enter any public GitHub username (or click an example demo handle on the landing page).
+3. OSS Match analyzes recent public repository history to build an observable technology footprint.
+4. Browse ranked open-source issues with deterministic match scores, review factual explanation cards, and filter by primary language, minimum match score, or contributor-friendly labels.
 
 ---
 
 ## How It Works
 
+OSS Match connects public developer activity to open-source contribution opportunities in four deterministic phases:
+
 ```
-GitHub profile
+GitHub Profile
     ↓
-Public repository analysis (last 30 repos)
+1. Profile Analysis (inspects public repositories, aggregates language bytes, detects technologies)
     ↓
-Language footprint (byte counts → percentages)
+2. Issue Discovery (searches open GitHub issues across repositories without arbitrary filters)
     ↓
-Technology detection (package manifests, config files, topics)
+3. Deterministic Matching (scores candidates across 7 observable components with weight renormalization)
     ↓
-Issue search (GitHub global search)
-    ↓
-Hard filtering (closed issues, abandoned repos, spam)
-    ↓
-Deterministic matching (weighted scoring)
-    ↓
-Explanation (derived from the same data as the score)
+4. Factual Explanations (transparent reasons explaining matches and observable gaps)
 ```
+
+1. **Profile Analysis**: Fetches up to 30 recent public repositories. Computes language breakdown using the Largest Remainder (Hare-Niemeyer) algorithm so percentages sum to exactly 100%. Analyzes dependency manifests, configuration files, and topics to detect technologies with verified evidence levels (`strong`, `moderate`, `limited`).
+2. **Candidate Discovery**: Searches open GitHub issues (`is:issue state:open archived:false`) across the broader open-source ecosystem without restricting candidates by arbitrary popularity thresholds or good-first-issue gates.
+3. **Deterministic Matching Engine**: Evaluates candidate issues against the user's observable footprint across 7 scoring components. Re-normalizes weights dynamically when data is absent.
+4. **Factual Explanations**: Generates transparent, objective reasons detailing why an issue matched, which technologies overlap, and what technologies or tools were not observed in the public footprint.
+
+---
+
+## Data Honesty & Privacy Guarantees
+
+OSS Match adheres to strict product honesty and data safety principles:
+
+- **Code volume, not skill**: Language percentages represent **"% of analyzed code volume"** across inspected public repositories. They do **not** measure skill, proficiency, competency, or expertise.
+- **Evidence-based signals, not competency ratings**: Match scores reflect observable signal alignment between an issue and public repository activity. They do **not** represent competency assessments, and they do **not** guarantee contribution success.
+- **Objective difficulty**: Difficulty estimates are only provided when repository maintainers explicitly label an issue (e.g. `good first issue`, `beginner`). Difficulty is never guessed, inferred, or fabricated.
+- **Public data only**: Accesses only publicly available repositories and issue data through GitHub's public REST API. Never accesses private repositories or private profile data.
+- **Stateless & zero database**: No user data, profiles, or recommendations are persisted to a database or tracked with cookies.
+- **Server-only credentials**: `GITHUB_API_TOKEN` is used strictly server-side to raise GitHub API rate limits (from 60 to 5,000 req/hr) and is never exposed in client bundles or logged.
 
 ---
 
 ## Features (V1)
 
 - **Technology footprint** — aggregated language statistics from public repositories, displayed as percentages of analyzed code (not skill percentages)
-- **Evidence-based technology detection** — detects React, Next.js, Docker, FastAPI, etc. from real evidence (package manifests, config files, topics)
-- **Deterministic matching** — same input always produces the same output; time is injected, not read from the clock
+- **Evidence-based technology detection** — detects React, Next.js, Docker, FastAPI, and 15+ other technologies from real evidence (manifests, configs, topics)
+- **Deterministic matching** — same input always produces the exact same score; time is injected, not read from the clock
 - **Transparent explanations** — every recommendation shows why it matched and what gaps to expect
-- **No account required** — public GitHub username is all that's needed
-- **No database** — stateless; data is fetched live from GitHub's public API
-- **Fully open source** — every part of the matching logic is visible and auditable
+- **Client-side filters** — filter by primary language, minimum match score, or contributor-friendly labels while preserving deterministic ranking order
+- **No account required** — enter any public GitHub username to begin
+- **No database** — stateless architecture; data is fetched live from GitHub's public API
+- **Production-hardened** — in-memory caching, in-flight request deduplication, and resilient rate-limit handling
+- **Fully open source** — all matching formulas, heuristics, and registry definitions are auditable
 
 ---
 
@@ -221,9 +243,15 @@ See [`tests/`](tests/) for the test suite.
 
 ---
 
-## Contributing
+## Contributing & Community
 
-See [CONTRIBUTING.md](CONTRIBUTING.md).
+We welcome contributions of all kinds — from adding new technology definitions to improving documentation and reporting bugs.
+
+- **Contribution Guide**: [CONTRIBUTING.md](CONTRIBUTING.md)
+- **Code of Conduct**: [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md)
+- **Security Policy**: [SECURITY.md](SECURITY.md)
+- **Changelog**: [CHANGELOG.md](CHANGELOG.md)
+- **Technical Architecture**: [docs/architecture.md](docs/architecture.md)
 
 ---
 
